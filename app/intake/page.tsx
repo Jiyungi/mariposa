@@ -4,6 +4,7 @@ import { PhoneFrame } from "@/components/mariposa/PhoneFrame";
 import { StickyHeader } from "@/components/mariposa/StickyHeader";
 import { DisclaimerFooter } from "@/components/mariposa/DisclaimerFooter";
 import { IntakeForm } from "@/components/mariposa/IntakeForm";
+import { VoiceIntakePanel } from "@/components/mariposa/VoiceIntakePanel";
 
 export const metadata = {
   title: "Intake · Mariposa",
@@ -24,6 +25,7 @@ export default function IntakePage() {
       />
       <div className="no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto">
         <main className="mariposa-rise flex-1 px-5 py-4">
+          <VoiceIntakePanel />
           <IntakeForm />
         </main>
         <DisclaimerFooter />

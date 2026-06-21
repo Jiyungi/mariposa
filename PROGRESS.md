@@ -76,6 +76,33 @@ Files added or changed:
 - `lib/agent/index.ts`
 - `test/agent/deepgram-voice.test.ts`
 
+### Voice Intake Turn
+
+- Added a push-to-talk voice panel on `/intake`.
+- The panel records directly from the browser microphone using `MediaRecorder`;
+  it does not require a visible file upload control.
+- Added `POST /api/intake/voice-turn`:
+  1. Accepts one recorded audio turn.
+  2. Transcribes it with Deepgram STT.
+  3. Extracts a conservative draft of intake fields for review.
+  4. Builds a short next-question response.
+  5. Attempts Deepgram TTS playback for the response.
+- The panel shows the transcript, draft fields, and response text. It plays the
+  TTS response when the browser allows audio playback.
+- This first pass does **not** auto-write fields into the validated intake form;
+  captured fields are review-only so the demo cannot silently autofill the wrong
+  data.
+
+Files added or changed:
+
+- `components/mariposa/VoiceIntakePanel.tsx`
+- `app/intake/page.tsx`
+- `app/api/intake/voice-turn/route.ts`
+- `lib/intake/voice.ts`
+- `lib/intake/voice.test.ts`
+- `lib/agent/deepgram-voice.ts`
+- `test/api/intake-voice-turn.test.ts`
+
 ### Live Voice Routing
 
 - Updated `lib/agent/live.ts` so insurance calls try Deepgram first when
@@ -521,6 +548,17 @@ Result (2026-06-21):
 - Local verification after Sentry wiring: `npm run typecheck`, `npm test`, and
   `npm run build` passed. Test suite passed: **256 tests** across 62 files
   (1 optional HTTP smoke test skipped).
+- Voice intake verification on 2026-06-21:
+  - Targeted voice tests passed:
+    `npm test -- lib/intake/voice.test.ts test/api/intake-voice-turn.test.ts test/agent/deepgram-voice.test.ts`
+  - `npm run typecheck` passed.
+  - `npm test` passed: **262 tests** across 64 files (1 optional HTTP smoke test
+    skipped).
+  - `npm run build` passed. Remaining build warning is the pre-existing
+    Agentspan SDK dynamic dependency expression warning; it does not block the
+    build.
+  - Local route smoke check passed: `HEAD /intake` returned `200 OK` from
+    `next dev` on port 3001.
 - Demo readiness verification on 2026-06-21:
   - `npm run demo:present` passed.
   - `npm run demo:insurance-flow` passed and exited cleanly.
@@ -537,9 +575,11 @@ Result (2026-06-21):
 
 ### Real Sponsor Wiring
 
-- Add real Deepgram STT/TTS or prerecorded audio ingestion. Current Deepgram work
-  is transcript-compatible only; `DEEPGRAM_API_KEY` is synced but the default
-  demo still uses the deterministic call script.
+- Exercise the new `/intake` Deepgram STT/TTS path with a real microphone in the
+  browser. Unit tests mock Deepgram; the backend route is wired to live Deepgram
+  when `DEEPGRAM_API_KEY` is present.
+- The insurance-flow demo still uses the deterministic transcript unless an audio
+  payload is passed to its Deepgram route.
 - Add real Arize SDK/API trace emission. Current hooks return local trace
   metadata only.
 - Host Agentspan on a reachable URL if orchestration should run on Vercel (today
