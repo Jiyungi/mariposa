@@ -5,12 +5,14 @@ import * as React from "react";
 
 import { Card, CardHeader } from "@/components/mariposa/Card";
 import { Button } from "@/components/ui/button";
+import type { VoiceIntakeDraft } from "@/lib/intake/voice";
 import { cn } from "@/lib/utils";
 
 type VoiceStatus = "idle" | "recording" | "processing";
 
 interface VoiceTurnResponse {
   transcript: string;
+  extracted: VoiceIntakeDraft;
   extractedSummary: string[];
   replyText: string;
   audio: {
@@ -33,7 +35,11 @@ function base64ToBlob(base64: string, mimeType: string): Blob {
   return new Blob([bytes], { type: mimeType });
 }
 
-export function VoiceIntakePanel() {
+export function VoiceIntakePanel({
+  onDraft,
+}: {
+  onDraft?: (draft: VoiceIntakeDraft) => void;
+}) {
   const [status, setStatus] = React.useState<VoiceStatus>("idle");
   const [isSupported, setIsSupported] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -88,10 +94,11 @@ export function VoiceIntakePanel() {
 
       const voiceResult = json as VoiceTurnResponse;
       setResult(voiceResult);
+      onDraft?.(voiceResult.extracted);
       playReply(voiceResult);
       setStatus("idle");
     },
-    [playReply],
+    [onDraft, playReply],
   );
 
   const stopTracks = React.useCallback(() => {

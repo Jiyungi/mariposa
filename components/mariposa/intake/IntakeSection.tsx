@@ -12,12 +12,13 @@ import {
   ToggleField,
 } from "./fields";
 import type { FieldConfig, SectionConfig } from "./config";
-import { useIntakeSection } from "./useIntakeSection";
+import { useIntakeSection, type DeepPartial } from "./useIntakeSection";
 
 interface IntakeSectionProps<T> {
   section: SectionConfig;
   schema: z.ZodType<T>;
   initial: T;
+  voicePatch?: DeepPartial<T>;
   hidden?: boolean;
   onValidityChange: (valid: boolean) => void;
 }
@@ -32,10 +33,18 @@ export function IntakeSection<T>({
   section,
   schema,
   initial,
+  voicePatch,
   hidden,
   onValidityChange,
 }: IntakeSectionProps<T>) {
-  const form = useIntakeSection(schema, initial, allFields(section), onValidityChange);
+  const fields = React.useMemo(() => allFields(section), [section]);
+  const form = useIntakeSection(
+    schema,
+    initial,
+    fields,
+    onValidityChange,
+    voicePatch,
+  );
 
   return (
     <div hidden={hidden} className="flex flex-col gap-4">

@@ -9,6 +9,9 @@ import {
   herIntakeSchema,
   hisIntakeSchema,
   togetherIntakeSchema,
+  type HerIntake,
+  type HisIntake,
+  type TogetherIntake,
 } from "@/lib/validation/intake";
 import {
   IntakeCompletionGuard,
@@ -16,6 +19,7 @@ import {
   type IntakeCompletedEmitter,
   type IntakePart,
 } from "@/lib/intake/completion";
+import type { VoiceIntakeDraft } from "@/lib/intake/voice";
 import { buildIntakeDefaults } from "./intake/defaults";
 import {
   HER_SECTION,
@@ -25,6 +29,7 @@ import {
   type SectionKey,
 } from "./intake/config";
 import { IntakeSection } from "./intake/IntakeSection";
+import type { DeepPartial } from "./intake/useIntakeSection";
 
 /*
   Dual intake forms (Task 13.1, Req 2.1 / 2.6 / 2.8).
@@ -61,10 +66,15 @@ interface IntakeFormProps {
    * `fertility.intake.completed` event.
    */
   onIntakeCompleted?: IntakeCompletedEmitter;
+  voiceDraft?: VoiceIntakeDraft;
 }
 
-export function IntakeForm({ onIntakeCompleted }: IntakeFormProps) {
+export function IntakeForm({ onIntakeCompleted, voiceDraft }: IntakeFormProps) {
   const defaults = React.useMemo(() => buildIntakeDefaults(), []);
+  const voicePatches = React.useMemo(
+    () => mapVoiceDraftToIntakePatches(voiceDraft),
+    [voiceDraft],
+  );
 
   const [active, setActive] = React.useState<SectionKey>("her");
   const [validity, setValidity] = React.useState<Record<IntakePart, boolean>>({
@@ -121,6 +131,7 @@ export function IntakeForm({ onIntakeCompleted }: IntakeFormProps) {
             section={meta.config}
             schema={meta.schema}
             initial={defaults[key]}
+            voicePatch={voicePatches[key]}
             hidden={active !== key}
             onValidityChange={handleValidity(key)}
           />
@@ -135,6 +146,30 @@ export function IntakeForm({ onIntakeCompleted }: IntakeFormProps) {
       />
     </div>
   );
+}
+
+function mapVoiceDraftToIntakePatches(
+  draft: VoiceIntakeDraft | undefined,
+): {
+  her?: DeepPartial<HerIntake>;
+  his?: DeepPartial<HisIntake>;
+  together?: DeepPartial<TogetherIntake>;
+} {
+  if (!draft) return {};
+
+  return {
+    her: draft.her,
+    his: draft.his,
+    together: draft.together
+      ? {
+          goal: draft.together.goal,
+          top_concern: draft.together.top_concern,
+          insurance: draft.together.insurance_provider
+            ? { provider: draft.together.insurance_provider }
+            : undefined,
+        }
+      : undefined,
+  };
 }
 
 // ---------------------------------------------------------------------------

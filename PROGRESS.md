@@ -89,13 +89,18 @@ Files added or changed:
   5. Attempts Deepgram TTS playback for the response.
 - The panel shows the transcript, draft fields, and response text. It plays the
   TTS response when the browser allows audio playback.
-- This first pass does **not** auto-write fields into the validated intake form;
-  captured fields are review-only so the demo cannot silently autofill the wrong
-  data.
+- The extracted draft now auto-populates the matching validated intake fields for
+  review: her age/months/cycle details, his semen-analysis status, shared
+  goal/top concern, and insurance provider. Invalid patches are rejected by the
+  existing intake schema instead of being committed.
 
 Files added or changed:
 
 - `components/mariposa/VoiceIntakePanel.tsx`
+- `components/mariposa/IntakeExperience.tsx`
+- `components/mariposa/IntakeForm.tsx`
+- `components/mariposa/intake/IntakeSection.tsx`
+- `components/mariposa/intake/useIntakeSection.ts`
 - `app/intake/page.tsx`
 - `app/api/intake/voice-turn/route.ts`
 - `lib/intake/voice.ts`

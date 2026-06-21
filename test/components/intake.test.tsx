@@ -146,4 +146,40 @@ describe("IntakeForm — inline validation (Task 13.1, Req 2.8)", () => {
     expect(screen.queryByRole("alert")).toBeNull();
     expect(input.value).toBe("50");
   });
+
+  it("auto-populates intake fields from a Deepgram voice draft", () => {
+    render(
+      <IntakeForm
+        voiceDraft={{
+          her: {
+            age: 34,
+            months_trying: 10,
+            cycle_regular: true,
+            avg_cycle_length: 50,
+          },
+          his: { semen_analysis_status: "in_progress" },
+          together: {
+            goal: "Complete fertility testing",
+            top_concern: "Insurance and cost clarity",
+            insurance_provider: "Pacific Crest Health",
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getAllByLabelText("Age")[0]).toHaveValue(34);
+    expect(screen.getByLabelText("Months trying")).toHaveValue(10);
+    expect(screen.getByLabelText("Average cycle length")).toHaveValue(50);
+    expect(screen.getByLabelText("Cycle is regular")).toBeChecked();
+
+    fireEvent.click(screen.getByRole("tab", { name: /His/i }));
+    expect(screen.getByLabelText("Analysis status")).toHaveValue("in_progress");
+
+    fireEvent.click(screen.getByRole("tab", { name: /Together/i }));
+    expect(screen.getByLabelText("Goal")).toHaveValue("Complete fertility testing");
+    expect(screen.getByLabelText("Top concern")).toHaveValue(
+      "Insurance and cost clarity",
+    );
+    expect(screen.getByLabelText("Provider")).toHaveValue("Pacific Crest Health");
+  });
 });

@@ -60,6 +60,41 @@ function parseNumber(raw: string, nullable: boolean): number | null | undefined 
   return Number.isNaN(n) ? undefined : n;
 }
 
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+export type DeepPartial<T> = {
+  [K in keyof T]?: T[K] extends Record<string, unknown>
+    ? DeepPartial<T[K]>
+    : T[K];
+};
+
+function mergePatch<T>(base: T, patch: DeepPartial<T>): T {
+  const copy = structuredClone(base) as Record<string, unknown>;
+
+  for (const [key, value] of Object.entries(patch as Record<string, unknown>)) {
+    if (value === undefined) continue;
+    const existing = copy[key];
+    copy[key] =
+      isPlainObject(existing) && isPlainObject(value)
+        ? mergePatch(existing, value)
+        : value;
+  }
+
+  return copy as T;
+}
+
+function draftsFromValues(fields: FieldConfig[], values: unknown): Record<string, string> {
+  const map: Record<string, string> = {};
+  for (const field of fields) {
+    if (field.kind === "text" || field.kind === "date" || field.kind === "number") {
+      map[keyOf(field.path)] = toDraft(getPath(values, field.path));
+    }
+  }
+  return map;
+}
+
 export interface UseIntakeSectionResult<T> {
   values: T;
   isValid: boolean;
@@ -78,18 +113,13 @@ export function useIntakeSection<T>(
   initial: T,
   fields: FieldConfig[],
   onValidityChange?: (valid: boolean) => void,
+  voicePatch?: DeepPartial<T>,
 ): UseIntakeSectionResult<T> {
   const [values, setValues] = React.useState<T>(() =>
     structuredClone(initial),
   );
   const [drafts, setDrafts] = React.useState<Record<string, string>>(() => {
-    const map: Record<string, string> = {};
-    for (const f of fields) {
-      if (f.kind === "text" || f.kind === "date" || f.kind === "number") {
-        map[keyOf(f.path)] = toDraft(getPath(initial, f.path));
-      }
-    }
-    return map;
+    return draftsFromValues(fields, initial);
   });
   const [errors, setErrors] = React.useState<Record<string, string>>({});
 
@@ -102,6 +132,24 @@ export function useIntakeSection<T>(
       onValidityChange?.(isValid);
     }
   }, [isValid, onValidityChange]);
+
+  React.useEffect(() => {
+    if (!voicePatch || Object.keys(voicePatch).length === 0) return;
+
+    setValues((current) => {
+      const candidate = mergePatch(current, voicePatch);
+      const result = safeValidate(schema, candidate);
+      setErrors(result.success ? {} : errorsByField(result.errors));
+
+      if (!result.success) return current;
+
+      setDrafts((prev) => ({
+        ...prev,
+        ...draftsFromValues(fields, candidate),
+      }));
+      return candidate;
+    });
+  }, [fields, schema, voicePatch]);
 
   const errorsByField = (issues: FieldIssue[]): Record<string, string> => {
     const map: Record<string, string> = {};
