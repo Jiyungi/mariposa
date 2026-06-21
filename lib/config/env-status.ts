@@ -70,10 +70,9 @@ export function describeMariposaEnv(
 
   integrations.push({
     name: "Voice / transcript",
-    mode:
-      isDeepgramVoiceEnabled(env) || isGrokVoiceEnabled(env) ? "live" : "fallback",
+    mode: isGrokVoiceEnabled(env) ? "live" : "fallback",
     detail: isDeepgramVoiceEnabled(env)
-      ? "Deepgram selected for insurance calls"
+      ? "Deepgram audio upload route is configured; default demo uses deterministic transcript unless audio is uploaded"
       : isGrokVoiceEnabled(env)
         ? "Grok Voice fallback path"
         : "Deterministic transcript fallback",
@@ -121,7 +120,7 @@ export function describeMariposaEnv(
     name: "Sentry errors",
     mode: isSentryEnabled(env) ? "live" : "disabled",
     detail: isSentryEnabled(env)
-      ? "Error capture enabled (local metadata today)"
+      ? "Server-side Sentry capture enabled for workflow/API errors"
       : "No-op error metadata",
   });
 

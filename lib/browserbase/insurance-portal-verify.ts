@@ -91,6 +91,16 @@ export async function verifyInsurancePortal(
       allowRedirects: true,
     });
 
+    if (
+      typeof response.statusCode === "number" &&
+      (response.statusCode < 200 || response.statusCode >= 300)
+    ) {
+      return fallbackResult(
+        packet,
+        `Browserbase fetch returned HTTP ${response.statusCode} for ${url}.`,
+      );
+    }
+
     const excerpt =
       typeof response.content === "string" && response.content.trim()
         ? response.content.trim()

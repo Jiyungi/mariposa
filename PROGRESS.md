@@ -172,6 +172,28 @@ Files added or changed:
 - `scripts/run-insurance-flow.ts`
 - `package.json`
 
+### Demo Readiness Pass
+
+- Fixed `npm run demo:insurance-flow` so the process exits cleanly after printing
+  output by closing the shared Redis client.
+- Updated presenter/env status wording so Deepgram is not overstated: the default
+  demo uses a deterministic transcript, while Deepgram is available through the
+  audio upload route.
+- Updated Sentry presenter wording to reflect real server-side capture through
+  `@sentry/nextjs`.
+- Installed `@langchain/core` so the Agentspan SDK no longer reports a missing
+  LangChain module during build.
+- Cleaned Calendar hook dependency warnings by memoizing derived reminder arrays.
+
+Files added or changed:
+
+- `scripts/run-insurance-flow.ts`
+- `lib/rag/redis-store.ts`
+- `lib/config/env-status.ts`
+- `components/mariposa/CalendarView.tsx`
+- `package.json`
+- `package-lock.json`
+
 ### Agent Memory Write
 
 - Added `writeAgentMemoryEvent(...)` for Redis-backed agent memory at
@@ -499,6 +521,15 @@ Result (2026-06-21):
 - Local verification after Sentry wiring: `npm run typecheck`, `npm test`, and
   `npm run build` passed. Test suite passed: **256 tests** across 62 files
   (1 optional HTTP smoke test skipped).
+- Demo readiness verification on 2026-06-21:
+  - `npm run demo:present` passed.
+  - `npm run demo:insurance-flow` passed and exited cleanly.
+  - `npm run verify:redis` passed with `mariposa-rag` and 40 indexed docs.
+  - `npm run typecheck` passed.
+  - `npm test` passed: **256 tests** across 62 files (1 optional HTTP smoke test
+    skipped).
+  - `npm run build` passed. Remaining build warning is an Agentspan SDK dynamic
+    dependency expression warning; it does not block the build.
 - Earlier full verification passed: **252 tests** across 61 files (1 optional HTTP smoke test
   skipped).
 

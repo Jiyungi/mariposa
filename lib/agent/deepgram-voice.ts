@@ -2,6 +2,7 @@ import { mockInsuranceCall } from "@/lib/agent/mock-fallback";
 import {
   resolveDeepgramApiKey,
   resolveDeepgramModel,
+  resolveDeepgramTtsModel,
 } from "@/lib/config";
 import type { AuthPacket, Turn } from "@/lib/types";
 
@@ -33,6 +34,17 @@ export interface DeepgramAudioTranscription {
 export interface TranscribeAudioWithDeepgramInput {
   audio: BodyInit;
   contentType?: string;
+  fetchImpl?: typeof fetch;
+  env?: NodeJS.ProcessEnv;
+}
+
+export interface DeepgramSpeechSynthesis {
+  audio: ArrayBuffer;
+  contentType: string;
+}
+
+export interface SpeakTextWithDeepgramInput {
+  text: string;
   fetchImpl?: typeof fetch;
   env?: NodeJS.ProcessEnv;
 }
@@ -230,6 +242,47 @@ export async function transcribeAudioWithDeepgram({
   }
 
   return { raw, transcript };
+}
+
+export async function speakTextWithDeepgram({
+  text,
+  fetchImpl = fetch,
+  env = process.env,
+}: SpeakTextWithDeepgramInput): Promise<DeepgramSpeechSynthesis> {
+  const apiKey = resolveDeepgramApiKey(env);
+  if (!apiKey) {
+    throw new DeepgramVoiceUnavailableError("DEEPGRAM_API_KEY is not configured.");
+  }
+
+  const trimmed = text.trim();
+  if (!trimmed) {
+    throw new DeepgramVoiceUnavailableError("Deepgram speech text is empty.");
+  }
+
+  const params = new URLSearchParams({
+    model: resolveDeepgramTtsModel(env),
+  });
+
+  const response = await fetchImpl(`https://api.deepgram.com/v1/speak?${params}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Token ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ text: trimmed }),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new DeepgramVoiceUnavailableError(
+      `Deepgram speech failed (${response.status}): ${detail.slice(0, 200)}`,
+    );
+  }
+
+  return {
+    audio: await response.arrayBuffer(),
+    contentType: response.headers.get("content-type") ?? "audio/mpeg",
+  };
 }
 
 /**

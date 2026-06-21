@@ -172,9 +172,11 @@ export async function searchRedisKnowledge(
   }
 }
 
-/** Test helper */
-export async function __closeRedisForTests(): Promise<void> {
+export async function closeRedisClient(): Promise<void> {
   if (client?.isOpen) await client.quit();
   client = null;
   connectPromise = null;
 }
+
+/** Test helper */
+export const __closeRedisForTests = closeRedisClient;

@@ -107,68 +107,79 @@ export function CalendarView({
 
   // Engine-derived reminders track the window exactly, so they can never drift
   // from the single source of truth.
-  const reminders: TimelineItem[] = windowOutput
-    ? [
-        {
-          id: "reminder-fertile-open",
-          kind: "reminder",
-          title: "Fertile window opens",
-          date: windowOutput.fertileWindowStart,
-          time: null,
-          description:
-            "Your estimated fertile window begins today, based on your cycle range.",
-        },
-        {
-          id: "reminder-priority",
-          kind: "reminder",
-          title: "Priority days begin",
-          date: windowOutput.minOvulation,
-          time: null,
-          description:
-            "The highest-priority days in your window start today. Confidence is " +
-            `${windowOutput.confidence.toLowerCase()} — see why on the trying-window card.`,
-        },
-      ]
-    : [];
+  const reminders: TimelineItem[] = React.useMemo(
+    () =>
+      windowOutput
+        ? [
+            {
+              id: "reminder-fertile-open",
+              kind: "reminder",
+              title: "Fertile window opens",
+              date: windowOutput.fertileWindowStart,
+              time: null,
+              description:
+                "Your estimated fertile window begins today, based on your cycle range.",
+            },
+            {
+              id: "reminder-priority",
+              kind: "reminder",
+              title: "Priority days begin",
+              date: windowOutput.minOvulation,
+              time: null,
+              description:
+                "The highest-priority days in your window start today. Confidence is " +
+                `${windowOutput.confidence.toLowerCase()} — see why on the trying-window card.`,
+            },
+          ]
+        : [],
+    [windowOutput],
+  );
 
-  const hisPrepReminders: TimelineItem[] = windowOutput
-    ? deriveHisPrepReminders(windowOutput).map((item) => ({
-        id: item.id,
-        kind: "reminder" as const,
-        title: item.title,
-        date: item.date,
-        time: null,
-        description: item.description,
-        column: item.column,
-      }))
-    : [];
+  const hisPrepReminders: TimelineItem[] = React.useMemo(
+    () =>
+      windowOutput
+        ? deriveHisPrepReminders(windowOutput).map((item) => ({
+            id: item.id,
+            kind: "reminder" as const,
+            title: item.title,
+            date: item.date,
+            time: null,
+            description: item.description,
+            column: item.column,
+          }))
+        : [],
+    [windowOutput],
+  );
 
   // Externally sourced events (e.g. the booked consult), plus a derived
   // prep-reminder the day before each consult.
-  const sourced: TimelineItem[] = [];
-  for (const e of events) {
-    if (!e.date) continue;
-    const kind: TimelineItem["kind"] = e.type === "consult" ? "consult" : "reminder";
-    sourced.push({
-      id: e.id,
-      kind,
-      title: e.title,
-      date: e.date,
-      time: e.time,
-      description: e.description,
-    });
-    if (kind === "consult") {
-      sourced.push({
-        id: `${e.id}-prep`,
-        kind: "reminder",
-        title: "Prep for your consult",
-        date: addDays(e.date, -1),
-        time: null,
-        description:
-          "Your consult is tomorrow. Gather your documents and the bring-list so you walk in ready.",
+  const sourced: TimelineItem[] = React.useMemo(() => {
+    const items: TimelineItem[] = [];
+    for (const e of events) {
+      if (!e.date) continue;
+      const kind: TimelineItem["kind"] = e.type === "consult" ? "consult" : "reminder";
+      items.push({
+        id: e.id,
+        kind,
+        title: e.title,
+        date: e.date,
+        time: e.time,
+        description: e.description,
       });
+      if (kind === "consult") {
+        items.push({
+          id: `${e.id}-prep`,
+          kind: "reminder",
+          title: "Prep for your consult",
+          date: addDays(e.date, -1),
+          time: null,
+          description:
+            "Your consult is tomorrow. Gather your documents and the bring-list so you walk in ready.",
+        });
+      }
     }
-  }
+    return items;
+  }, [events]);
 
   const timeline = [...reminders, ...hisPrepReminders, ...sourced].sort(
     (a, b) => compareIso(a.date, b.date) || a.title.localeCompare(b.title),

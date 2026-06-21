@@ -60,4 +60,52 @@ describe("verifyInsurancePortal()", () => {
       process.env.NEXT_PUBLIC_APP_URL = previous.NEXT_PUBLIC_APP_URL;
     }
   });
+
+  it("falls back to the local portal snapshot when Browserbase returns a non-2xx page", async () => {
+    const previous = {
+      USE_BROWSERBASE: process.env.USE_BROWSERBASE,
+      BROWSERBASE_API_KEY: process.env.BROWSERBASE_API_KEY,
+      NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    };
+    process.env.USE_BROWSERBASE = "true";
+    process.env.BROWSERBASE_API_KEY = "bb_test_key";
+    process.env.NEXT_PUBLIC_APP_URL = "https://missing-deployment.example.com";
+
+    const fetchImpl = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      url: "https://api.browserbase.com/v1/fetch",
+      headers: new Headers({ "content-type": "application/json" }),
+      json: async () => ({
+        content: "**404**: NOT_FOUND",
+        statusCode: 404,
+        contentType: "text/markdown",
+        encoding: "utf-8",
+        headers: {},
+        id: "fetch_404",
+      }),
+      text: async () =>
+        JSON.stringify({
+          content: "**404**: NOT_FOUND",
+          statusCode: 404,
+        }),
+    }));
+
+    try {
+      const result = await verifyInsurancePortal({
+        packet: SEED_AUTH_PACKET,
+        fetchImpl: fetchImpl as unknown as typeof fetch,
+      });
+
+      expect(result.mode).toBe("fallback-snapshot");
+      expect(result.statusCode).toBeNull();
+      expect(result.excerpt).toContain("Pacific Crest Health");
+      expect(result.excerpt).not.toContain("NOT_FOUND");
+      expect(result.contextBlock).toContain("HTTP 404");
+    } finally {
+      process.env.USE_BROWSERBASE = previous.USE_BROWSERBASE;
+      process.env.BROWSERBASE_API_KEY = previous.BROWSERBASE_API_KEY;
+      process.env.NEXT_PUBLIC_APP_URL = previous.NEXT_PUBLIC_APP_URL;
+    }
+  });
 });

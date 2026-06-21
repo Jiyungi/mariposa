@@ -5,6 +5,7 @@
  *   npm run demo:insurance-flow
  */
 import { runInsuranceFlow } from "../lib/orkes/insurance-flow";
+import { closeRedisClient } from "../lib/rag/redis-store";
 import { loadEnvFiles } from "./load-env";
 
 async function main() {
@@ -27,9 +28,12 @@ async function main() {
   };
 
   console.log(JSON.stringify(summary, null, 2));
+  await closeRedisClient();
 }
 
 main().catch((err) => {
   console.error(err);
-  process.exit(1);
+  void closeRedisClient().finally(() => {
+    process.exit(1);
+  });
 });
