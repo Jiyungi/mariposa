@@ -1,6 +1,7 @@
 import {
   getCalendarEvents,
   getCallRecords,
+  getCouple,
   getTasks,
 } from "@/lib/db";
 import { buildSeedCouple, SEED_COUPLE_ID } from "@/lib/db/seed";
@@ -48,7 +49,8 @@ export async function loadWorkspaceForSummary(
   coupleId: string = SEED_COUPLE_ID,
 ): Promise<CoupleWorkspace> {
   const workspace = buildSeedCouple();
-  const [callRecords, calendarEvents, tasks] = await Promise.all([
+  const [persistedCouple, callRecords, calendarEvents, tasks] = await Promise.all([
+    getCouple(coupleId),
     getCallRecords(coupleId),
     getCalendarEvents(coupleId),
     getTasks(coupleId),
@@ -56,6 +58,24 @@ export async function loadWorkspaceForSummary(
 
   return {
     ...workspace,
+    couple: persistedCouple
+      ? {
+          ...workspace.couple,
+          ...persistedCouple.couple,
+        }
+      : workspace.couple,
+    herProfile: persistedCouple
+      ? {
+          ...workspace.herProfile,
+          ...persistedCouple.herProfile,
+        }
+      : workspace.herProfile,
+    himProfile: persistedCouple
+      ? {
+          ...workspace.himProfile,
+          ...persistedCouple.himProfile,
+        }
+      : workspace.himProfile,
     callRecords: callRecords.map(toWorkspaceCallRecord),
     calendarEvents:
       calendarEvents.length > 0 ? calendarEvents : workspace.calendarEvents,

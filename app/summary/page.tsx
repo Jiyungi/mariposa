@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 
+import { AddResultCard } from "@/components/mariposa/AddResultCard";
 import { DoctorSummary } from "@/components/mariposa/DoctorSummary";
 import { DisclaimerFooter } from "@/components/mariposa/DisclaimerFooter";
 import {
@@ -63,6 +64,7 @@ export default async function SummaryPage() {
       />
       <div className="no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto">
         <main className="mariposa-rise flex-1 px-5 py-4">
+          <AddResultCard coupleId={SEED_COUPLE_ID} />
           {showSourceNote ? (
             <InsuranceSummarySourceNote />
           ) : (

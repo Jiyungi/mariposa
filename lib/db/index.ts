@@ -146,6 +146,44 @@ export async function saveTasks(coupleId: string, items: Task[]): Promise<Task[]
   return items.map(clone);
 }
 
+export async function updateHerProfile(
+  coupleId: string,
+  patch: Partial<HerProfile>,
+): Promise<HerProfile | null> {
+  const existing = couples.get(coupleId);
+  if (!existing) return null;
+
+  existing.herProfile = {
+    ...existing.herProfile,
+    ...clone(patch),
+  };
+  couples.set(coupleId, clone(existing));
+  return clone(existing.herProfile);
+}
+
+export async function updateHimProfile(
+  coupleId: string,
+  patch: Partial<HimProfile>,
+): Promise<HimProfile | null> {
+  const existing = couples.get(coupleId);
+  if (!existing) return null;
+
+  existing.himProfile = {
+    ...existing.himProfile,
+    ...clone(patch),
+    lifestyle: {
+      ...existing.himProfile.lifestyle,
+      ...(patch.lifestyle ? clone(patch.lifestyle) : {}),
+    },
+    medical_history: {
+      ...existing.himProfile.medical_history,
+      ...(patch.medical_history ? clone(patch.medical_history) : {}),
+    },
+  };
+  couples.set(coupleId, clone(existing));
+  return clone(existing.himProfile);
+}
+
 export async function saveCalendarEvent(event: CalendarEvent): Promise<CalendarEvent> {
   const existing = calendarEvents.get(event.couple_id) ?? [];
   existing.push(clone(event));

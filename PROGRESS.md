@@ -330,14 +330,24 @@ Files added or changed:
 - Doctor summary overlays persisted call records from the in-memory data layer.
 - Running `/demo/insurance-flow` populates verified coverage facts on
   `/summary`.
+- Added an `Add a new result` card on `/summary` so a user can add post-intake
+  lab, semen-analysis, insurance, or clinic context.
+- Added `POST /api/results`, which parses common lab/semen result phrases,
+  updates the in-memory partner profile, creates a review task, writes Redis
+  agent memory when available, and refreshes the summary context.
 
 Files added or changed:
 
 - `lib/workspace/load-for-summary.ts`
+- `lib/workspace/result-update.ts`
+- `lib/workspace/result-update.test.ts`
 - `app/summary/page.tsx`
+- `app/api/results/route.ts`
+- `components/mariposa/AddResultCard.tsx`
 - `components/mariposa/InsuranceSummaryPrompt.tsx`
 - `test/workspace/summary-from-insurance-flow.test.ts`
 - `test/components/insurance-summary-prompt.test.tsx`
+- `test/api/results-route.test.ts`
 
 ### Redis Verification Script
 
@@ -563,6 +573,14 @@ Result (2026-06-21):
     build.
   - Local route smoke check passed: `HEAD /intake` returned `200 OK` from
     `next dev` on port 3001.
+- Result-update verification on 2026-06-21:
+  - `npm test -- lib/workspace/result-update.test.ts test/api/results-route.test.ts`
+    passed.
+  - `npm test -- test/workspace/summary-from-insurance-flow.test.ts test/components/insurance-summary-prompt.test.tsx test/components/workspace.test.tsx lib/workspace/result-update.test.ts test/api/results-route.test.ts`
+    passed.
+  - `npm run typecheck` passed.
+  - `npm run build` passed. Remaining build warning is the pre-existing
+    Agentspan SDK dynamic dependency expression warning.
 - Demo readiness verification on 2026-06-21:
   - `npm run demo:present` passed.
   - `npm run demo:insurance-flow` passed and exited cleanly.
