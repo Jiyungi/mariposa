@@ -96,16 +96,21 @@ Files added or changed:
   - `traceAgentStep(...)`
   - `traceModelCall(...)`
   - `traceRetrieval(...)`
-- Added a no-op-safe Sentry-style error capture helper:
+- Added a no-op-safe Sentry error capture helper:
   - `captureWorkflowError(...)`
-- These helpers do not call live Arize or Sentry SDKs yet.
+- Arize helpers still return local trace metadata only.
+- Sentry is wired server-side through `@sentry/nextjs` when `SENTRY_DSN` is set.
 - Added tests for disabled/enabled behavior and stable local IDs.
 
-Files added:
+Files added or changed:
 
 - `lib/observability/arize.ts`
 - `lib/observability/sentry.ts`
 - `lib/observability/observability.test.ts`
+- `sentry.server.config.ts`
+- `instrumentation.ts`
+- `package.json`
+- `package-lock.json`
 
 ### Local Orkes-Shaped Insurance Flow
 
@@ -489,7 +494,12 @@ Result (2026-06-21):
   local server running.
 - Production API (`/api/demo/insurance-flow`): Browserbase live-fetch, Claude,
   Redis memory, persistence confirmed.
-- Test suite passed: **252 tests** across 61 files (1 optional HTTP smoke test
+- Server-side Sentry capture is wired through `@sentry/nextjs` when `SENTRY_DSN`
+  is present; local tests mock the SDK and verify workflow tags/context.
+- Local verification after Sentry wiring: `npm run typecheck`, `npm test`, and
+  `npm run build` passed. Test suite passed: **256 tests** across 62 files
+  (1 optional HTTP smoke test skipped).
+- Earlier full verification passed: **252 tests** across 61 files (1 optional HTTP smoke test
   skipped).
 
 ## Left To Do
@@ -501,7 +511,6 @@ Result (2026-06-21):
   demo still uses the deterministic call script.
 - Add real Arize SDK/API trace emission. Current hooks return local trace
   metadata only.
-- Add real Sentry SDK/API capture. Current hook returns local event metadata only.
 - Host Agentspan on a reachable URL if orchestration should run on Vercel (today
   it is local-only via `npm run agentspan:start`).
 - Expand Agentspan orchestration beyond the single-tool insurance wrapper if
@@ -527,6 +536,8 @@ Result (2026-06-21):
 
 ### Hardening
 
-- Add real SDK emission for Arize and Sentry when sponsor credentials are present.
+- Add real SDK/API emission for Arize when sponsor credentials are present.
+- Add a deliberate Sentry test-error route or script only if needed for dashboard
+  verification; do not expose it publicly in production without a guard.
 - Review npm audit findings separately. They were reported by `npm install` but
   were not addressed in this pass.

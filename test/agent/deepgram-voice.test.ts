@@ -98,9 +98,10 @@ describe("transcribeAudioWithDeepgram()", () => {
       contentType: "audio/wav",
       fetchImpl: fetchImpl as unknown as typeof fetch,
       env: {
+        NODE_ENV: "test",
         DEEPGRAM_API_KEY: "dg_test",
         DEEPGRAM_MODEL: "nova-3",
-      } as NodeJS.ProcessEnv,
+      },
     });
 
     expect(result.transcript).toEqual([
@@ -117,15 +118,16 @@ describe("transcribeAudioWithDeepgram()", () => {
         }),
       }),
     );
-    expect(fetchImpl.mock.calls[0][0]).toContain("diarize=true");
-    expect(fetchImpl.mock.calls[0][0]).toContain("utterances=true");
+    const firstCall = fetchImpl.mock.calls.at(0) as unknown[] | undefined;
+    expect(String(firstCall?.[0])).toContain("diarize=true");
+    expect(String(firstCall?.[0])).toContain("utterances=true");
   });
 
   it("requires a Deepgram API key", async () => {
     await expect(
       transcribeAudioWithDeepgram({
         audio: "audio",
-        env: {} as NodeJS.ProcessEnv,
+        env: { NODE_ENV: "test" },
       }),
     ).rejects.toThrow("DEEPGRAM_API_KEY");
   });

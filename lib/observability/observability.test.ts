@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   traceAgentStep,
@@ -7,10 +7,31 @@ import {
 } from "@/lib/observability/arize";
 import { captureWorkflowError } from "@/lib/observability/sentry";
 
+const sentryMock = vi.hoisted(() => ({
+  captureException: vi.fn(() => "sentry-event-123"),
+  setTag: vi.fn(),
+  setContext: vi.fn(),
+}));
+
+vi.mock("@sentry/nextjs", () => ({
+  captureException: sentryMock.captureException,
+  withScope: (
+    callback: (scope: {
+      setTag: typeof sentryMock.setTag;
+      setContext: typeof sentryMock.setContext;
+    }) => string,
+  ) =>
+    callback({ setTag: sentryMock.setTag, setContext: sentryMock.setContext }),
+}));
+
 const ENV_KEYS = ["ENABLE_ARIZE", "ARIZE_API_KEY", "SENTRY_DSN"] as const;
 const originalEnv: Record<string, string | undefined> = {};
 
 beforeEach(() => {
+  sentryMock.captureException.mockClear();
+  sentryMock.setTag.mockClear();
+  sentryMock.setContext.mockClear();
+
   for (const key of ENV_KEYS) {
     if (!(key in originalEnv)) originalEnv[key] = process.env[key];
     delete process.env[key];
@@ -78,9 +99,10 @@ describe("Sentry observability hook", () => {
       eventId: null,
       message: "call failed",
     });
+    expect(sentryMock.captureException).not.toHaveBeenCalled();
   });
 
-  it("returns a stable event ID when Sentry is enabled", () => {
+  it("captures exceptions with workflow tags when Sentry is enabled", () => {
     process.env.SENTRY_DSN = "https://example@sentry.io/1";
 
     expect(
@@ -90,8 +112,16 @@ describe("Sentry observability hook", () => {
       }),
     ).toEqual({
       enabled: true,
-      eventId: "mariposa:error:insurance-flow:extract-coverage:bad_payload",
+      eventId: "sentry-event-123",
       message: "bad payload",
+    });
+    expect(sentryMock.captureException).toHaveBeenCalledWith(expect.any(Error));
+    expect(sentryMock.setTag).toHaveBeenCalledWith("app", "mariposa");
+    expect(sentryMock.setTag).toHaveBeenCalledWith("flow", "insurance-flow");
+    expect(sentryMock.setTag).toHaveBeenCalledWith("step", "extract-coverage");
+    expect(sentryMock.setContext).toHaveBeenCalledWith("workflow", {
+      flow: "insurance-flow",
+      step: "extract-coverage",
     });
   });
 });

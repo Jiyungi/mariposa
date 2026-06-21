@@ -60,11 +60,22 @@ describe("runInsuranceFlow() Agentspan routing", () => {
         follow_up_tasks: ["Task"],
       },
       retrieval: { mode: "keyword", chunkCount: 8 },
-      providers: { voice: "deterministic-fallback", model: "mock" },
+      providers: {
+        voice: "deterministic-fallback",
+        model: "mock",
+        web: "portal-snapshot",
+      },
       fallbackFlags: {
         localOrchestration: false,
         deterministicTranscript: true,
         deterministicModel: true,
+        deterministicPortal: true,
+      },
+      webVerification: {
+        mode: "fallback-snapshot",
+        url: null,
+        statusCode: null,
+        excerpt: "Synthetic portal snapshot",
       },
       memory: { written: false, eventId: null, redisKey: null },
       persistence: {
