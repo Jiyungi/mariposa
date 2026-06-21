@@ -248,11 +248,15 @@ Files added or changed:
   excerpt, fallback flags, Agentspan execution link when applicable, extracted
   coverage, and follow-up tasks.
 - Added `InsuranceFlowDemo` and `InsuranceFlowDemoChrome` components.
+- The optional prerecorded Deepgram insurance-audio path remains available, but
+  is collapsed under a developer transcript test below the main workflow result
+  so the judge demo does not imply users upload insurance call files.
 
 Files added:
 
 - `app/demo/insurance-flow/page.tsx`
 - `components/mariposa/InsuranceFlowDemo.tsx`
+- `components/mariposa/InsuranceFlowDeepgramUpload.tsx`
 
 ### Insurance Flow Persistence
 

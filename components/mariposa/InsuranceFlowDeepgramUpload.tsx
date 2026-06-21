@@ -63,30 +63,36 @@ export function InsuranceFlowDeepgramUpload() {
   }
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader
-          title="Try real Deepgram STT"
-          description="Upload a prerecorded insurance-call audio file. Deepgram transcribes it, then Mariposa reruns the insurance flow with that transcript."
-        />
-        <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
-          <label className="block">
-            <span className="text-sm font-medium text-foreground">Audio file</span>
-            <input
-              type="file"
-              accept="audio/*,.mp3,.m4a,.wav,.webm,.ogg"
-              className="mt-2 block w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground file:mr-3 file:rounded-full file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-secondary-foreground"
-              onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-            />
-          </label>
-          <Button type="submit" size="sm" disabled={isUploading || !file}>
-            {isUploading ? "Transcribing..." : "Transcribe with Deepgram"}
-          </Button>
-          {error ? (
-            <p className="text-sm font-medium text-destructive">{error}</p>
-          ) : null}
-        </form>
-      </Card>
+    <details className="space-y-4">
+      <summary className="cursor-pointer rounded-xl border border-border/70 bg-card p-4 text-sm font-medium text-muted-foreground shadow-card transition-colors hover:text-foreground">
+        Developer test: Deepgram insurance transcript input
+      </summary>
+
+      <div className="pt-4">
+        <Card>
+          <CardHeader
+            title="Deepgram transcript test"
+            description="Optional developer-only check: transcribe a prerecorded insurance call and rerun this workflow with that transcript."
+          />
+          <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
+            <label className="block">
+              <span className="text-sm font-medium text-foreground">Audio file</span>
+              <input
+                type="file"
+                accept="audio/*,.mp3,.m4a,.wav,.webm,.ogg"
+                className="mt-2 block w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground file:mr-3 file:rounded-full file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-secondary-foreground"
+                onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+              />
+            </label>
+            <Button type="submit" size="sm" disabled={isUploading || !file}>
+              {isUploading ? "Transcribing..." : "Transcribe with Deepgram"}
+            </Button>
+            {error ? (
+              <p className="text-sm font-medium text-destructive">{error}</p>
+            ) : null}
+          </form>
+        </Card>
+      </div>
 
       {result ? (
         <>
@@ -112,6 +118,6 @@ export function InsuranceFlowDeepgramUpload() {
           <InsuranceFlowDemo result={result.result} />
         </>
       ) : null}
-    </div>
+    </details>
   );
 }

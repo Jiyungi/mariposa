@@ -19,8 +19,8 @@ export default async function InsuranceFlowDemoPage() {
     return (
       <InsuranceFlowDemoChrome>
         <div className="space-y-4">
-          <InsuranceFlowDeepgramUpload />
           <InsuranceFlowDemo result={result} />
+          <InsuranceFlowDeepgramUpload />
         </div>
       </InsuranceFlowDemoChrome>
     );
