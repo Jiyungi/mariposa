@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Calendar,
+  ClipboardList,
   Home,
   ListChecks,
   MessageCircle,
@@ -19,13 +20,13 @@ interface TabDef {
   icon: LucideIcon;
 }
 
-/** The four primary destinations (Req 13.4). Order is intentional: the
- *  daily glance (Home), then timing (Calendar), then doing (Tasks), then
- *  asking (Chat). */
+/** Primary destinations. Order follows the couple's workflow: daily glance,
+ * timing, actions, shareable summary, then grounded questions. */
 export const TABS: readonly TabDef[] = [
   { label: "Home", href: "/home", icon: Home },
   { label: "Calendar", href: "/calendar", icon: Calendar },
   { label: "Tasks", href: "/tasks", icon: ListChecks },
+  { label: "Summary", href: "/summary", icon: ClipboardList },
   { label: "Chat", href: "/chat", icon: MessageCircle },
 ] as const;
 

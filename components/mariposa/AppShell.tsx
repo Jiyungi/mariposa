@@ -21,6 +21,7 @@ const SCREEN_META: Record<string, ScreenMeta> = {
   "/home": { title: "Maya & Daniel", subtitle: "Your shared fertility prep" },
   "/calendar": { title: "Calendar", subtitle: "Trying window & priority days" },
   "/tasks": { title: "Tasks", subtitle: "Her · His · Together" },
+  "/summary": { title: "Doctor summary", subtitle: "Ready to share at your visit" },
   "/chat": { title: "Ask Mariposa", subtitle: "Answers grounded in your data" },
 };
 

@@ -335,6 +335,8 @@ Files added or changed:
 - Doctor summary overlays persisted call records from the in-memory data layer.
 - Running `/demo/insurance-flow` populates verified coverage facts on
   `/summary`.
+- `/summary` now lives inside the shared app tab layout and appears as a bottom
+  tab beside Tasks.
 - Added an `Add a new result` card on `/summary` so a user can add post-intake
   lab, semen-analysis, insurance, or clinic context.
 - Added `POST /api/results`, which parses common lab/semen result phrases,
@@ -346,7 +348,9 @@ Files added or changed:
 - `lib/workspace/load-for-summary.ts`
 - `lib/workspace/result-update.ts`
 - `lib/workspace/result-update.test.ts`
-- `app/summary/page.tsx`
+- `app/(tabs)/summary/page.tsx`
+- `components/mariposa/BottomTabs.tsx`
+- `components/mariposa/AppShell.tsx`
 - `app/api/results/route.ts`
 - `components/mariposa/AddResultCard.tsx`
 - `components/mariposa/InsuranceSummaryPrompt.tsx`
