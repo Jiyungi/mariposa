@@ -1,0 +1,159 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Mariposa design tokens — OKLCH, composed from brand seed oklch(0.42 0.163 350).
+  Mood: warm dawn light, quiet intimacy meeting clinical clarity. Reassurance,
+  never alarm. A deep berry-rose primary carries the brand on near-white
+  surfaces; a calm indigo accent handles information, teal confirms.
+  Tokens hold space-separated OKLCH components so Tailwind can wrap them in
+  oklch(...) and apply alpha via the <alpha-value> slot.
+*/
+@layer base {
+  :root {
+    /* Architectural surfaces */
+    --background: 0.985 0.006 350; /* soft rose-tinted page behind cards */
+    --foreground: 0.26 0.018 345; /* ink — body text, ~10:1 on white */
+    --card: 1 0 0; /* pure white card surface */
+    --card-foreground: 0.26 0.018 345;
+    --popover: 1 0 0;
+    --popover-foreground: 0.26 0.018 345;
+
+    /* Brand */
+    --primary: 0.47 0.155 350; /* berry-rose */
+    --primary-foreground: 0.99 0.004 350;
+    --secondary: 0.955 0.012 350; /* soft rose fill */
+    --secondary-foreground: 0.4 0.07 350;
+    --muted: 0.965 0.005 345;
+    --muted-foreground: 0.48 0.022 345; /* secondary text, ~4.6:1 on white */
+    --accent: 0.95 0.014 350; /* hover/selected surface */
+    --accent-foreground: 0.4 0.07 350;
+
+    /* State */
+    --destructive: 0.55 0.17 25;
+    --destructive-foreground: 0.99 0.004 25;
+    --success: 0.6 0.105 165; /* teal — confirmed / on-track */
+    --success-foreground: 0.99 0.004 165;
+    --warning: 0.72 0.12 70; /* amber — borderline / attention */
+    --warning-foreground: 0.27 0.04 70;
+    --info: 0.55 0.11 265; /* calm indigo — informational accent / links */
+    --info-foreground: 0.99 0.004 265;
+
+    /* Lines & focus */
+    --border: 0.92 0.008 345;
+    --input: 0.92 0.008 345;
+    --ring: 0.47 0.155 350;
+    --radius: 1rem;
+  }
+
+  .dark {
+    --background: 0.18 0.014 340;
+    --foreground: 0.95 0.006 345;
+    --card: 0.22 0.016 340;
+    --card-foreground: 0.95 0.006 345;
+    --popover: 0.22 0.016 340;
+    --popover-foreground: 0.95 0.006 345;
+    --primary: 0.66 0.14 350;
+    --primary-foreground: 0.18 0.02 350;
+    --secondary: 0.27 0.024 345;
+    --secondary-foreground: 0.92 0.02 350;
+    --muted: 0.26 0.018 345;
+    --muted-foreground: 0.7 0.02 345;
+    --accent: 0.3 0.03 348;
+    --accent-foreground: 0.95 0.02 350;
+    --destructive: 0.6 0.16 25;
+    --destructive-foreground: 0.98 0.004 25;
+    --success: 0.66 0.1 165;
+    --success-foreground: 0.16 0.02 165;
+    --warning: 0.78 0.12 75;
+    --warning-foreground: 0.2 0.03 70;
+    --info: 0.66 0.11 265;
+    --info-foreground: 0.16 0.02 265;
+    --border: 0.3 0.02 345;
+    --input: 0.3 0.02 345;
+    --ring: 0.66 0.14 350;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family:
+      ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif;
+    font-feature-settings: "cv01", "ss01";
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Display headings: tight but never touching, balanced line breaks */
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+@layer components {
+  /* Subtle, intentional content entrance. The default state is fully
+     visible; the animation only enhances it, so content never depends on
+     a class-triggered transition to appear (and never ships blank on a
+     headless render or hidden tab). */
+  .mariposa-rise {
+    animation: mariposa-rise 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mariposa-rise {
+      animation: mariposa-fade 200ms ease both;
+    }
+  }
+}
+
+@keyframes mariposa-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mariposa-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbars while preserving scrolling. Mariposa reads as a native app:
+     content regions still scroll, but no scrollbar chrome is ever shown. */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE/old Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none; /* WebKit/Blink */
+    width: 0;
+    height: 0;
+  }
+}
